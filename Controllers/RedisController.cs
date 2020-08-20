@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using RedisClient.Models;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 
 namespace RedisClient.Controllers
@@ -23,12 +24,12 @@ namespace RedisClient.Controllers
 
         [HttpPost]
         [Route("get")]
-        public async Task<string> GetKey([FromBody] string key)
+        public async Task<string> GetKey([FromBody] GetValueRequest req)
         {
             string value = string.Empty;
             try
             {
-                value = await this._redisCacheClient.Db0.GetAsync<string>(key);
+                value = await this._redisCacheClient.Db0.GetAsync<string>(req.key);
             }
             catch (Exception ex)
             {
@@ -40,12 +41,12 @@ namespace RedisClient.Controllers
 
         [HttpPost]
         [Route("set")]
-        public async Task<bool> Set([FromBody] string key, string value)
+        public async Task<bool> Set([FromBody] SetValueRequest req)
         {
             bool added = false;
             try
             {
-                added = await this._redisCacheClient.Db0.AddAsync(key, value, DateTimeOffset.Now.AddMinutes(10));
+                added = await this._redisCacheClient.Db0.AddAsync(req.key, req.value, DateTimeOffset.Now.AddMinutes(10));
             }
             catch (Exception ex)
             {

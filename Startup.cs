@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -27,7 +28,14 @@ namespace RedisClient
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var redisConfiguration = Configuration.GetSection("Redis").Get<RedisConfiguration>();
+            RedisConfiguration redisConfig = new RedisConfiguration()
+            {
+                ConnectTimeout = int.Parse(Environment.GetEnvironmentVariable("REDIS_TIMEOUT")),
+                Ssl = bool.Parse(Environment.GetEnvironmentVariable("REDIS_SSL")),
+                Database = int.Parse(Environment.GetEnvironmentVariable("REDIS_DB")),
+                Hosts = new RedisHost[] { new RedisHost() { Host = Environment.GetEnvironmentVariable("REDIS_HOST"), Port = int.Parse(Environment.GetEnvironmentVariable("REDIS_PORT")) } }
+            };
+            var redisConfiguration = redisConfig;
             services.AddControllers();
             services.AddStackExchangeRedisExtensions<NewtonsoftSerializer>(redisConfiguration);
         }
@@ -39,13 +47,9 @@ namespace RedisClient
             {
                 app.UseDeveloperExceptionPage();
             }
-
             app.UseHttpsRedirection();
-
             app.UseRouting();
-
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

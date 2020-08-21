@@ -22,6 +22,13 @@ namespace RedisClient.Controllers
             _redisCacheClient = redisCacheClient;
         }
 
+        [HttpGet]
+        [Route("/")]
+        public int KeepAlive()
+        {
+            return 200;
+        }
+
         [HttpPost]
         [Route("get")]
         public async Task<string> GetKey([FromBody] GetValueRequest req)
